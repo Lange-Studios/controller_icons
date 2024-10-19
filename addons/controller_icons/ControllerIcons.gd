@@ -242,10 +242,7 @@ func parse_event(event: InputEvent) -> Texture:
 	if path.is_empty():
 		return null
 
-	var base_paths := [
-		_settings.custom_asset_dir + "/",
-		"res://addons/controller_icons/assets/"
-	]
+	var base_paths := _settings.get_assets_directories()
 	for base_path in base_paths:
 		if base_path.is_empty():
 			continue
@@ -289,10 +286,7 @@ func get_matching_event(path: String, input_type: InputType = _last_input_type, 
 
 func _expand_path(path: String, input_type: int, controller: int) -> Array:
 	var paths := []
-	var base_paths := [
-		_settings.custom_asset_dir + "/",
-		"res://addons/controller_icons/assets/"
-	]
+	var base_paths := _settings.get_assets_directories()
 	for base_path in base_paths:
 		if base_path.is_empty():
 			continue

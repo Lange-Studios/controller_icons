@@ -42,6 +42,8 @@ enum Devices {
 ## Custom asset lookup folder for custom icons
 @export_dir var custom_asset_dir : String = ""
 
+@export var only_use_custom_assets: bool = false
+
 ## Custom generic joystick mapper script
 @export var custom_mapper : Script
 
@@ -53,3 +55,12 @@ enum Devices {
 
 ## Custom LabelSettings. If unset, uses engine default settings.
 @export var custom_label_settings : LabelSettings
+
+func get_assets_directories() -> Array:
+	if only_use_custom_assets:
+		return [custom_asset_dir]
+	else:
+		return [
+			custom_asset_dir,
+			"res://addons/controller_icons/assets"
+		]

@@ -77,10 +77,7 @@ func populate(editor_interface: EditorInterface) -> void:
 
 	asset_names_root = n_base_asset_names.create_item()
 
-	var base_paths := [
-		ControllerIcons._settings.custom_asset_dir,
-		"res://addons/controller_icons/assets"
-	]
+	var base_paths := ControllerIcons._settings.get_assets_directories()
 
 	# UPGRADE: In Godot 4.2, for-loop variables can be
 	# statically typed:
