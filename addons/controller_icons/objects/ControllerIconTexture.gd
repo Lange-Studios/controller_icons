@@ -55,6 +55,11 @@ class_name ControllerIconTexture
 		path = _path
 		_load_texture_path()
 
+@export var index : int = 0:
+	set(_index):
+		index = _index
+		_load_texture_path()
+
 enum ShowMode {
 	ANY, ## Icon will be display on any input method.
 	KEYBOARD_MOUSE, ## Icon will be display only when the keyboard/mouse is being used.
@@ -165,9 +170,9 @@ func _load_texture_path_impl():
 	if ControllerIcons.is_node_ready() and _can_be_shown():
 		var input_type = ControllerIcons._last_input_type if force_type == ForceType.NONE else force_type - 1
 		if ControllerIcons.get_path_type(path) == ControllerIcons.PathType.INPUT_ACTION:
-			var event := ControllerIcons.get_matching_event(path, input_type)
+			var event := ControllerIcons.get_matching_event(path, input_type, ControllerIcons._last_controller, index)
 			textures.append_array(ControllerIcons.parse_event_modifiers(event))
-		var tex := ControllerIcons.parse_path(path, input_type)
+		var tex := ControllerIcons.parse_path(path, input_type, ControllerIcons._last_controller, index)
 		if tex:
 			textures.append(tex)
 	_textures = textures

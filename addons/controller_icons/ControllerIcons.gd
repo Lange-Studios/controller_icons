@@ -189,10 +189,10 @@ func refresh():
 func get_joypad_type(controller: int = _last_controller) -> ControllerSettings.Devices:
 	return Mapper._get_joypad_type(controller, _settings.joypad_fallback)
 
-func parse_path(path: String, input_type = _last_input_type, last_controller = _last_controller) -> Texture:
+func parse_path(path: String, input_type = _last_input_type, last_controller = _last_controller, event_index = 0) -> Texture:
 	if typeof(input_type) == TYPE_NIL:
 		return null
-	var root_paths := _expand_path(path, input_type, last_controller)
+	var root_paths := _expand_path(path, input_type, last_controller, event_index)
 	for root_path in root_paths:
 		if _load_icon(root_path):
 			continue
@@ -260,45 +260,89 @@ func get_path_type(path: String) -> PathType:
 	else:
 		return PathType.SPECIFIC_PATH
 
-func get_matching_event(path: String, input_type: InputType = _last_input_type, controller: int = _last_controller) -> InputEvent:
+func get_matching_event(
+	path: String,
+	input_type: InputType = _last_input_type,
+	controller: int = _last_controller,
+	event_index = 0
+) -> InputEvent:
+	event_index = event_index if event_index != null else 0
 	var events : Array
 	if _custom_input_actions.has(path):
 		events = _custom_input_actions[path]
 	else:
 		events = InputMap.action_get_events(path)
 
+	var event_count = 0
 	var fallback = null
 	for event in events:
 		match event.get_class():
 			"InputEventKey", "InputEventMouse", "InputEventMouseMotion", "InputEventMouseButton":
 				if input_type == InputType.KEYBOARD_MOUSE:
-					return event
+					if event_count == event_index:
+						return event
+					else:
+						event_count += 1
 			"InputEventJoypadButton", "InputEventJoypadMotion":
 				if input_type == InputType.CONTROLLER:
 					# Use the first device specific mapping if there is one.
 					if event.device == controller:
-						return event
+						if event_count == event_index:
+							return event
+						else:
+							event_count += 1
 					# Otherwise use the first "all devices" mapping.
 					elif fallback == null and event.device == -1:
-						fallback = event
+						if event_count == event_index:
+							fallback = event
+						else:
+							event_count += 1
 
 	return fallback
 
-func _expand_path(path: String, input_type: int, controller: int) -> Array:
+func get_matching_event_count(
+	path: String,
+	input_type: InputType = _last_input_type,
+	controller: int = _last_controller
+) -> int:
+	var event_count = 0
+	var events : Array
+	if _custom_input_actions.has(path):
+		events = _custom_input_actions[path]
+	else:
+		events = InputMap.action_get_events(path)
+
+	for event in events:
+		match event.get_class():
+			"InputEventKey", "InputEventMouse", "InputEventMouseMotion", "InputEventMouseButton":
+				if input_type == InputType.KEYBOARD_MOUSE:
+					event_count += 1
+			"InputEventJoypadButton", "InputEventJoypadMotion":
+				if input_type == InputType.CONTROLLER:
+					# Use the first device specific mapping if there is one.
+					if event.device == controller:
+						event_count += 1
+					# Otherwise use the first "all devices" mapping.
+					elif event.device == -1:
+						event_count += 1
+
+	return event_count
+
+func _expand_path(path: String, input_type: int, controller: int, event_index = 0) -> Array:
 	var paths := []
 	var base_paths := _settings.get_assets_directories()
 	for base_path in base_paths:
 		if base_path.is_empty():
 			continue
-		base_path += _convert_path_to_asset_file(path, input_type, controller)
+		base_path += _convert_path_to_asset_file(path, input_type, controller, event_index)
 
 		paths.push_back(base_path + "." + _base_extension)
 	return paths
 
-func _convert_path_to_asset_file(path: String, input_type: int, controller: int) -> String:
+func _convert_path_to_asset_file(path: String, input_type: int, controller: int, event_index = 0) -> String:
 	match get_path_type(path):
 		PathType.INPUT_ACTION:
-			var event := get_matching_event(path, input_type, controller)
+			var event := get_matching_event(path, input_type, controller, event_index)
 			if event:
 				return _convert_event_to_path(event)
 			return path

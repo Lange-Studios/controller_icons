@@ -43,7 +43,7 @@ class ControllerIcons_TexturePreview:
 var preview: ControllerIcons_TexturePreview
 
 func _can_handle(object: Object) -> bool:
-	return object is ControllerIconTexture
+	return object is ControllerIconTexture or object is ControllerIconBindsContainer
 
 func _parse_begin(object: Object) -> void:
 	preview = ControllerIcons_TexturePreview.new(editor_interface)
