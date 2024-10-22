@@ -139,9 +139,9 @@ func _input(event: InputEvent):
 	var input_type = _last_input_type
 	var controller = _last_controller
 	match event.get_class():
-		"InputEventKey", "InputEventMouseButton":
+		"InputEventKey":
 			input_type = InputType.KEYBOARD_MOUSE
-		"InputEventMouseMotion":
+		"InputEventMouseMotion", "InputEventMouseButton":
 			if _settings.allow_mouse_remap and _test_mouse_velocity(event.relative):
 				input_type = InputType.KEYBOARD_MOUSE
 		"InputEventJoypadButton":
