@@ -276,6 +276,9 @@ func get_matching_event(
 	var event_count = 0
 	var fallback = null
 	for event in events:
+		if event == null:
+			continue
+
 		match event.get_class():
 			"InputEventKey", "InputEventMouse", "InputEventMouseMotion", "InputEventMouseButton":
 				if input_type == InputType.KEYBOARD_MOUSE:
