@@ -31,6 +31,8 @@ const _MOUSE_VELOCITY_DELTA := 0.1
 var _t : float
 var _mouse_velocity : int
 
+var _supports_key_and_mouse: bool
+
 var Mapper = preload("res://addons/controller_icons/Mapper.gd").new()
 
 # Default actions will be the builtin editor actions when
@@ -110,6 +112,7 @@ func _parse_input_actions():
 			_add_custom_input_action(input_action, data)
 
 func _ready():
+	_supports_key_and_mouse = (OS.get_name() != "Android" and OS.get_name() != "iOS")
 	Input.joy_connection_changed.connect(_on_joy_connection_changed)
 	_settings = load("res://config/controller_icon_settings.tres")
 	if not _settings:
@@ -412,12 +415,12 @@ func _convert_asset_file_to_tts(path: String) -> String:
 			return path
 
 func _convert_event_to_path(event: InputEvent):
-	if event is InputEventKey:
+	if _supports_key_and_mouse and event is InputEventKey:
 		# If this is a physical key, convert to localized scancode
 		if event.keycode == 0:
 			return _convert_key_to_path(DisplayServer.keyboard_get_keycode_from_physical(event.physical_keycode))
 		return _convert_key_to_path(event.keycode)
-	elif event is InputEventMouseButton:
+	elif _supports_key_and_mouse and event is InputEventMouseButton:
 		return _convert_mouse_button_to_path(event.button_index)
 	elif event is InputEventJoypadButton:
 		return _convert_joypad_button_to_path(event.button_index, event.device)
